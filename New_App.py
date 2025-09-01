@@ -1,8 +1,8 @@
+##Flask Application
 from flask import Flask, render_template, request
 import pickle
 import pandas as pd
 
-# إنشاء التطبيق
 app = Flask(__name__)
 
 # --- 1. Load the Pre-trained Model ---
@@ -17,8 +17,7 @@ except FileNotFoundError:
 
 @app.route('/')
 def home():
-    return render_template('index.html')  # صفحة HTML للإدخال
-
+    return render_template('index.html')  
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -26,7 +25,6 @@ def predict():
         return "Model not loaded!"
 
     try:
-        # --- 2. استلام البيانات من الفورم ---
         school = request.form['school']
         reason = request.form['reason']
         studytime = int(request.form['studytime'])
@@ -41,7 +39,6 @@ def predict():
         g1 = int(request.form['g1'])
         g2 = int(request.form['g2'])
 
-        # --- 3. تجهيز الداتا ---
         user_data = {
             'school': 'GP' if school == "Gabriel Pereira (GP)" else 'MS',
             'Medu': medu,
@@ -60,7 +57,6 @@ def predict():
 
         df = pd.DataFrame([user_data])
 
-        # تحويل categorical لـ numeric
         df['school'] = df['school'].map({'GP': 1, 'MS': 0})
         df['reason'] = df['reason'].map({'home': 1, 'reputation': 2, 'course': 3, 'other': 4})
         df['schoolsup'] = df['schoolsup'].map({'yes': 1, 'no': 0})
@@ -72,7 +68,6 @@ def predict():
                     'schoolsup', 'higher', 'Dalc', 'Walc', 'G1', 'G2', 'Subject', 'Averge_rate']
         processed_data = df[features]
 
-        # --- 4. Prediction ---
         prediction = model.predict(processed_data)[0]
 
         return render_template("index.html", prediction_text=f"Predicted Final Grade: {prediction}")
@@ -83,3 +78,4 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
